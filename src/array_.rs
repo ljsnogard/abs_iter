@@ -8,6 +8,10 @@ where
     Self: AsRef<[Self::Elem]> + Borrow<[Self::Elem]>,
 {
     type Elem: Sized;
+
+    fn as_slice(&self) -> &[Self::Elem] {
+        self.as_ref()
+    }
 }
 
 pub trait TrMutSliceLike
@@ -15,7 +19,11 @@ where
     Self: TrSliceLike
         + AsMut<[Self::Elem]>
         + BorrowMut<[Self::Elem]>,
-{}
+{
+    fn as_slice_mut(&mut self) -> &mut [Self::Elem] {
+        self.as_mut()
+    }
+}
 
 pub trait TrArray : TrMutSliceLike {
     const LENGTH: usize;
