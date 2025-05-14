@@ -3,6 +3,11 @@ use core::{
     iter::Iterator,
 };
 
+/// Collections that can provide iterator accessing to the view in the form of
+/// `Borrow`) of the its items.
+///
+/// Arrays `[T; N]`, slices `[T]` and `&[T]`, `Option<T>` and `Result<T>` 
+/// implements this trait.
 pub trait TrItemsRefView {
     type Item: ?Sized;
     type View<'view>: Borrow<Self::Item>
@@ -12,6 +17,11 @@ pub trait TrItemsRefView {
     fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>>;
 }
 
+/// Collections that can provide iterator accessing to the view in the form of
+/// `BorrowMut`) of the its items.
+///
+/// Arrays `[T; N]`, slices `[T]` and `&[T]`, `Option<T>` and `Result<T>` 
+/// implements this trait.
 pub trait TrItemsMutView {
     type Item: ?Sized;
     type View<'view>: BorrowMut<Self::Item>

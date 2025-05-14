@@ -3,6 +3,8 @@ use core::{
     convert::{AsRef, AsMut},
 };
 
+/// This trait provides the associated type `Elem` and a the `as_slice` function
+/// for types that implementing both `AsRef<[T]>` and `Borrow<[T]>`
 pub trait TrSliceLike
 where
     Self: AsRef<[Self::Elem]> + Borrow<[Self::Elem]>,
@@ -14,6 +16,8 @@ where
     }
 }
 
+/// This trait provides the associated type `Elem` and a the `as_slice_mut`
+/// function for types that implementing both `AsMut<[T]>` and `BorrowMut<[T]>`
 pub trait TrMutSliceLike
 where
     Self: TrSliceLike
@@ -25,6 +29,7 @@ where
     }
 }
 
+/// An abstraction over the arrays
 pub trait TrArray : TrMutSliceLike {
     const LENGTH: usize;
 }
