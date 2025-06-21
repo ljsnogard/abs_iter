@@ -11,5 +11,5 @@ extern crate std;
 #[cfg(any(feature = "collections", test))]
 mod collections_;
 
-pub use array_::{TrArray, TrSliceLike, TrMutSliceLike};
+pub use array_::{TrArray, TrAsSlice, TrAsSliceMut};
 pub use iter_::{TrItemsRefView, TrItemsMutView};
