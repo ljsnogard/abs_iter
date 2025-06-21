@@ -1,6 +1,6 @@
 use core::{
     borrow::{Borrow, BorrowMut},
-    iter::Iterator,
+    iter::IntoIterator,
 };
 
 /// Collections that can provide iterator accessing to the view in the form of
@@ -10,11 +10,8 @@ use core::{
 /// implements this trait.
 pub trait TrItemsRefView {
     type Item: ?Sized;
-    type View<'view>: Borrow<Self::Item>
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>>;
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>>;
 }
 
 /// Collections that can provide iterator accessing to the view in the form of
@@ -24,33 +21,28 @@ pub trait TrItemsRefView {
 /// implements this trait.
 pub trait TrItemsMutView {
     type Item: ?Sized;
-    type View<'view>: BorrowMut<Self::Item>
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>>;
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>>;
 }
 
 // for array [T; N]
 
 impl<T, const N: usize> TrItemsRefView for [T; N] {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
 
 impl<T, const N: usize> TrItemsMutView for [T; N] {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -59,22 +51,18 @@ impl<T, const N: usize> TrItemsMutView for [T; N] {
 
 impl<T> TrItemsRefView for [T] {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
 
 impl<T> TrItemsMutView for [T] {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -83,22 +71,18 @@ impl<T> TrItemsMutView for [T] {
 
 impl<T> TrItemsRefView for &[T] {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
 
 impl<T> TrItemsMutView for &mut [T] {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -107,22 +91,18 @@ impl<T> TrItemsMutView for &mut [T] {
 
 impl<T> TrItemsRefView for Option<T> {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
 
 impl<T> TrItemsMutView for Option<T> {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -131,22 +111,35 @@ impl<T> TrItemsMutView for Option<T> {
 
 impl<T, E> TrItemsRefView for Result<T, E> {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
 
 impl<T, E> TrItemsMutView for Result<T, E> {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
+    }
+}
+
+
+// for str
+
+impl TrItemsRefView for str {
+    type Item = str;
+
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
+        let mut chars = self.char_indices().peekable();
+
+        core::iter::from_fn(move || {
+            let (start, _) = chars.next()?;
+            let end = chars.peek().map(|(i, _)| *i).unwrap_or(self.len());
+            Some(&self[start..end])
+        })
     }
 }

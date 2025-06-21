@@ -1,7 +1,13 @@
-use std::{
-    alloc::Allocator,
+extern crate alloc;
+
+use alloc::{
     collections::{BTreeSet, LinkedList, VecDeque},
     vec::Vec,
+};
+use core::{
+    alloc::Allocator,
+    borrow::{Borrow, BorrowMut},
+    iter::IntoIterator,
 };
 
 use crate::{TrItemsMutView, TrItemsRefView};
@@ -13,11 +19,8 @@ where
     A: Allocator + Clone,
 {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
@@ -29,11 +32,8 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
@@ -43,11 +43,10 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -59,11 +58,8 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
@@ -73,11 +69,10 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
@@ -89,11 +84,8 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view Self::Item
-    where
-        Self: 'view;
 
-    fn items_ref_view(&self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_ref_view(&self) -> impl IntoIterator<Item: Borrow<Self::Item>> {
         self.iter()
     }
 }
@@ -103,11 +95,10 @@ where
     A: Allocator,
 {
     type Item = T;
-    type View<'view> = &'view mut Self::Item
-    where
-        Self: 'view;
 
-    fn items_mut_view(&mut self) -> impl Iterator<Item = Self::View<'_>> {
+    fn items_mut_view(
+        &mut self,
+    ) -> impl IntoIterator<Item: BorrowMut<Self::Item>> {
         self.iter_mut()
     }
 }
